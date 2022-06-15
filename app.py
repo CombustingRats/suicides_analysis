@@ -7,10 +7,18 @@ app = Dash(__name__)
 
 df = pd.read_csv('master.csv')
 
+# -------------------------------------------------------------------------------------------------------------------
+# Date Processing
+
 dff = df.copy()
+
+dff.drop(labels=['HDI for year', 'country-year'], axis=1, inplace=True)
 gb_country = dff.groupby('country').sum()
 sr_country = ((gb_country['suicides_no'] / gb_country['population']) * (10**5)).reset_index()
 sr_country.columns=['Country Name', 'Suicide Rate (per 100K)']
+
+# -------------------------------------------------------------------------------------------------------------------
+# Figure Generation
 
 fig = px.choropleth(
     data_frame = sr_country,
@@ -21,27 +29,66 @@ fig = px.choropleth(
     #hover_data=sr_country,
     hover_name = 'Country Name',
     color_continuous_scale=px.colors.sequential.Viridis,
-    template = 'ggplot2'
+    template = 'ggplot2',
 )
 
 fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
 fig.update_geos(visible=False, showcountries=True)
 
+gb_year = df.groupby('year').sum()
+suicide_rate = (gb_year['suicides_no'] / gb_year['population'] * (10**5)).reset_index()
+suicide_rate.columns = ['Year','Suicide Rate (per 100k)']
+fig2 = px.line(suicide_rate, x="Year", y="Suicide Rate (per 100k)")
+
+gb_sex = df.groupby('sex').sum()
+sr_sex = ((gb_sex['suicides_no'] / gb_sex['population']) * (10 ** 5)).reset_index()
+sr_sex.columns = ['Sex','Suicide Rate (per 100k)']
+fig3 = px.bar(sr_sex, x='Sex', y='Suicide Rate (per 100k)', color='Sex', color_discrete_sequence=["red", "blue"])
+
+gb_age = df.groupby('age').sum().reindex(['5-14 years', '15-24 years', '25-34 years', '35-54 years', '55-74 years', '75+ years'])
+sr_age = ((gb_age['suicides_no'] / gb_age['population']) * (10**5)).reset_index()
+sr_age.columns = ['Age Group','Suicide Rate (per 100k)']
+fig4 = px.bar(sr_age, x='Age Group', y='Suicide Rate (per 100k)', color='Age Group', color_discrete_sequence=px.colors.qualitative.Dark2)
+
 # -------------------------------------------------------------------------------------------------------------------
 # Layout
 
-app.layout = html.Div(children=[
-    html.H1(children='Suicide Data Dashboard', style={'text-align':'center'}),
+app.layout = html.Div([
+    html.H1(children='Suicide Data Dashboard', style={'text-align':'center', 'padding': '3px 3px 5px 5px'}),
 
-    html.Div(children='''
-            Suicide rate across countries per 100K Population from 1985-2016
-            ''',
-            style={'text-align':'center'}),
+    html.Div([
+        html.H3('Suicide rate across countries (per 100K) Population from 1985-2016', style={'text-align':'center'}),
+        dcc.Graph(
+            id='suicide-map',
+            figure=fig
+        ),
+        html.H3('Suicide Rate Over Time', style={'text-align':'center','margin': '30px'}),
+        dcc.Graph(
+            id='suicides-over-time',
+            figure=fig2
+        ),
 
-    dcc.Graph(
-        id='suicide-map',
-        figure=fig
-    )
+        html.Div([
+            html.Div([
+                html.H3('Suicide Rate by Sex', style={'text-align':'center', 'margin': '0'}),
+                dcc.Graph(
+                    id = 'suicide-rate-over-time',
+                    figure=fig3
+                )
+                ], style={'padding':'5px'}),
+
+            html.Div([
+                html.H3('Suicide Rate by Age Group', style={'text-align':'center', 'margin': '0'}),
+                dcc.Graph(
+                    id='suicide-rate-age-group',
+                    figure=fig4
+                )
+            ])
+
+        ], style={'display':'grid', 'grid-template-columns': '1fr 1fr'})
+
+    ], style={'padding':'20px','max-width': '1200px', 'margin':'auto', 'box-shadow': '0 0 0 1pt black' , 'border-radius': '2pt'})
+
 ])
 
 # -------------------------------------------------------------------------------------------------------------------
