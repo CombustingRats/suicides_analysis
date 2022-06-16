@@ -40,12 +40,24 @@ fig.update_geos(visible=False, showcountries=True)
 gb_year = df.groupby('year').sum()
 suicide_rate = (gb_year['suicides_no'] / gb_year['population'] * (10**5)).reset_index()
 suicide_rate.columns = ['Year','Suicide Rate (per 100k)']
-fig2 = px.line(suicide_rate, x="Year", y="Suicide Rate (per 100k)", title="Yearly Suicide Rates")
+fig2 = px.line(suicide_rate, 
+            x="Year", 
+            y="Suicide Rate (per 100k)", 
+            title="Yearly Suicide Rates",
+            template='ggplot2',
+            height=400)
+fig2.update_layout(title_text='By Year of Occurance', 
+            title_font_family="Courier", 
+            title_x=0.1)
 
 gb_sex = df.groupby('sex').sum()
 sr_sex = ((gb_sex['suicides_no'] / gb_sex['population']) * (10 ** 5)).reset_index()
 sr_sex.columns = ['Sex','Suicide Rate (per 100k)']
-fig3 = px.bar(sr_sex, x='Sex', y='Suicide Rate (per 100k)', color='Sex', color_discrete_sequence=["red", "blue"], title='By Gender')
+fig3 = px.bar(sr_sex, x='Sex', y='Suicide Rate (per 100k)', color='Sex', color_discrete_sequence=["salmon", "skyblue"], title='By Gender',
+            template='simple_white')
+fig3.update_layout(
+        title_font_family="Courier",
+        title_x=0.15)
 
 gb_age = df.groupby('age').sum().reindex(['5-14 years', '15-24 years', '25-34 years', '35-54 years', '55-74 years', '75+ years'])
 sr_age = ((gb_age['suicides_no'] / gb_age['population']) * (10**5)).reset_index()
@@ -53,27 +65,62 @@ sr_age.columns = ['Age Group','Suicide Rate (per 100k)']
 fig4 = px.bar(sr_age, 
             x='Age Group', 
             y='Suicide Rate (per 100k)', 
+            height=400,
             color='Age Group', 
             title='By Age Group',
-            color_discrete_sequence=px.colors.qualitative.Dark2)
-
+            color_discrete_sequence=px.colors.qualitative.Dark2,
+            template='simple_white')
+fig4.update_layout(
+        title_font_family="Courier",
+        title_x=0.15)
 # -------------------------------------------------------------------------------------------------------------------
 # Layout
 
 app.layout = html.Div([
     html.Div([
-        html.H1(children='Exploration of Suicide Data 1985-2016', style={'text-align':'left', 'padding': '15px 30px 15px 30px'}),
+        html.H1(children='Exploration of Suicide Data (1985-2016)', style={'text-align':'left', 'padding': '15px 30px 15px 30px'}),
         
+         # Highlights bar
+        html.Div([
+                html.Div([
+                    html.H3('Lithuania'),
+                    html.Br(),
+                    html.P('Country with Highest Suicide Rate (41.18)')
+                ], className='hi-lite-card'),
+
+                html.Div([
+                    html.H3('350%'),
+                    html.Br(),
+                    html.P('Higher Rate of Suicide Amongst Males vs. Females')
+                ], className='hi-lite-card'),
+
+                html.Div([
+                    html.H3('1995'),
+                    html.Br(),
+                    html.P('Year With the Highest Rate of Suicide (15.3)')
+                    
+                ], className='hi-lite-card'),
+
+                html.Div([
+                    html.H3('75+'),
+                    html.Br(),
+                    html.P('Age Group with Highest Suicide Rate')
+                    
+                ], className='hi-lite-card')
+
+            ], className='hi-lite-cont'),
+
         html.Div([
             
             # by Country
             html.Div([
-                html.H3('Suicide rate across countries (per 100K) Population from 1985-2016', style={'text-align':'left', 'padding': '5px 5px 5px 30px'}),
+                html.P('By Country, Average Rate Across Year Range', style={'font-size':'12pt', 'text-align':'left', 'padding': '5px 5px 5px 30px'}),
                 dcc.Graph(
                     id = 'suicide-loc',
                     figure=fig
                 )
                 ], className='card'),
+
             # by Sex
             html.Div([
                 dcc.Graph(
