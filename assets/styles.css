@@ -1,0 +1,18 @@
+.background{
+    margin:-10pt;
+    padding:-10pt;
+    background: rgba(225, 223, 223, 0.731);
+}
+
+.card {
+    border-radius : 0.5pt;
+    box-shadow : 0 0 0 1pt rgb(170, 157, 157);
+    padding: 3%;
+    margin : 10px;
+    background-color:white
+}
+
+.dash-layout{
+    display: grid;
+    grid-template-columns: 4fr 2fr;
+}
