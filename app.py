@@ -45,19 +45,57 @@ fig2 = px.line(suicide_rate,
             y="Suicide Rate (per 100k)", 
             title="Yearly Suicide Rates",
             template='ggplot2',
+            markers=True,
             height=400)
 fig2.update_layout(title_text='By Year of Occurance', 
             title_font_family="Courier", 
             title_x=0.1)
+fig2.add_annotation(x=1995, 
+                    y=15.3,
+                    text='Suicide Rates Peaked in 1995',
+                    showarrow=True,
+                    arrowhead=1
+                    )
+fig2.add_annotation(x=2015, 
+                    y=11.47,
+                    text='Suicide Rates Reached a Minimum in 2015',
+                    showarrow=True,
+                    arrowhead=1,
+                    ax=10,
+                    ay=20
+                    )
 
 gb_sex = df.groupby('sex').sum()
 sr_sex = ((gb_sex['suicides_no'] / gb_sex['population']) * (10 ** 5)).reset_index()
 sr_sex.columns = ['Sex','Suicide Rate (per 100k)']
+
 fig3 = px.bar(sr_sex, x='Sex', y='Suicide Rate (per 100k)', color='Sex', color_discrete_sequence=["salmon", "skyblue"], title='By Gender',
             template='simple_white')
+fig3.add_hline(y=20.714, line_width=1, line_dash="dash", line_color="black")
+fig3.add_hline(y=5.936, line_width=1, line_dash="dash", line_color="black")
 fig3.update_layout(
         title_font_family="Courier",
         title_x=0.15)
+fig3.add_annotation(xref='x',
+                    yref='y',
+                    axref='x',
+                    ayref='y',
+                    x='female', 
+                    y=20,
+                    showarrow=True,
+                    arrowhead=1,
+                    arrowwidth=3,
+                    ax='female',
+                    ay=5.935
+                    )
+fig3.add_annotation(x='female', 
+                    y=13.5,
+                    xshift=30,
+                    text='3.5x',
+                    font_size=15,
+                    showarrow=False
+                    )
+
 
 gb_age = df.groupby('age').sum().reindex(['5-14 years', '15-24 years', '25-34 years', '35-54 years', '55-74 years', '75+ years'])
 sr_age = ((gb_age['suicides_no'] / gb_age['population']) * (10**5)).reset_index()
@@ -68,7 +106,7 @@ fig4 = px.bar(sr_age,
             height=400,
             color='Age Group', 
             title='By Age Group',
-            color_discrete_sequence=px.colors.qualitative.Dark2,
+            color_discrete_sequence=px.colors.qualitative.Set1,
             template='simple_white')
 fig4.update_layout(
         title_font_family="Courier",
